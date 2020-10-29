@@ -25,14 +25,15 @@ const mostBlogs = blogs => {
     let most = { blogs:0 }
     blogs.forEach(blog => {
         if(count.has(blog.author)) {
-            let likes =  count.get(blog.author) + 1
-            count.set(blog.author, likes + 1)
-            if(likes > most.blogs) most = {author:blog.author, blogs:likes} 
+            let numBlogs =  count.get(blog.author) + 1
+            count.set(blog.author, numBlogs)
+            if(numBlogs > most.blogs) most = {author:blog.author, blogs:numBlogs} 
         }
         else count.set(blog.author, 1)
     })
     return most
 }
+
 
 
 

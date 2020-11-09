@@ -40,7 +40,7 @@ beforeEach(async () => {
 
 })
 
-test('GET request to /api/blogs', async () => {
+test('GET request to /api/blogs returns correct blogs', async () => {
     
     const results = await api
         .get('/api/blogs')
@@ -49,7 +49,20 @@ test('GET request to /api/blogs', async () => {
         .then()
 
     expect(results.body).toHaveLength(initialBlogs.length)
+    expect(results.body).toMatchObject(initialBlogs)
+
+})
+
+test('Blogs have id property', async () => {
     
+    const results = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/ )
+        .then()
+
+    console.log(results.body)
+    expect(results.body[0]).toHaveProperty('id')
 
 })
 

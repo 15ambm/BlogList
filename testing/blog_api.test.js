@@ -92,6 +92,30 @@ test('Can add a new blog to the database', async () => {
 
 })
 
+test('Blogs missing likes default to 0 likes', async () => {
+    
+    const newBlog = {
+        title: "New Blog",
+        author: "Rich Johnson",
+        url: "No",  
+       } 
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+   const results = await api
+       .get('/api/blogs')
+       .expect(200)
+       .expect('Content-Type', /application\/json/)
+
+    expect(results.body[3]).toHaveProperty('likes')
+    expect(results.body[3].likes).toBe(0)
+
+})
+
 afterAll(async () => {
     await Blog.deleteMany({})
     mongoose.connection.close()

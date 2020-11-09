@@ -116,6 +116,27 @@ test('Blogs missing likes default to 0 likes', async () => {
 
 })
 
+test('Blogs missing title and url property return 400 bad request', async () => {
+    
+    const newBlog = {
+        author: "Rich Johnson",
+        likes: 123
+       } 
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+
+   const results = await api
+       .get('/api/blogs')
+       .expect(200)
+       .expect('Content-Type', /application\/json/)
+
+    expect(results.body).toMatchObject(initialBlogs)
+
+})
+
 afterAll(async () => {
     await Blog.deleteMany({})
     mongoose.connection.close()

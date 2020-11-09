@@ -46,7 +46,6 @@ test('GET request to /api/blogs returns correct blogs', async () => {
         .get('/api/blogs')
         .expect(200)
         .expect('Content-Type', /application\/json/ )
-        .then()
 
     expect(results.body).toHaveLength(initialBlogs.length)
     expect(results.body).toMatchObject(initialBlogs)
@@ -59,14 +58,42 @@ test('Blogs have id property', async () => {
         .get('/api/blogs')
         .expect(200)
         .expect('Content-Type', /application\/json/ )
-        .then()
 
     console.log(results.body)
     expect(results.body[0]).toHaveProperty('id')
 
 })
 
-afterAll(() => {
+
+test('Can add a new blog to the database', async () => {
+
+    const newBlog = {
+        title: "New Blog",
+        author: "Rich Johnson",
+        url: "No",
+        likes: 69
+    } 
+    
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const results = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+    expect(results.body).toHaveLength(initialBlogs.length + 1)
+    
+    const newData = initialBlogs.concat(newBlog)
+    expect(results.body).toMatchObject(newData)
+
+})
+
+afterAll(async () => {
+    await Blog.deleteMany({})
     mongoose.connection.close()
 })
   

@@ -59,7 +59,6 @@ test('Blogs have id property', async () => {
         .expect(200)
         .expect('Content-Type', /application\/json/ )
 
-    console.log(results.body)
     expect(results.body[0]).toHaveProperty('id')
 
 })
@@ -134,6 +133,26 @@ test('Blogs missing title and url property return 400 bad request', async () => 
        .expect('Content-Type', /application\/json/)
 
     expect(results.body).toMatchObject(initialBlogs)
+
+})
+
+test('Can delete a blog', async () => {
+
+    const preDeleteResults = await api
+       .get('/api/blogs')
+       .expect(200)
+       .expect('Content-Type', /application\/json/)
+       
+    await api
+        .delete(`/api/blogs/${preDeleteResults.body[0].id}`)
+        .expect(204)
+
+    const postDeleteResults = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+ 
+    expect(postDeleteResults.body).toHaveLength(initialBlogs.length - 1)
 
 })
 

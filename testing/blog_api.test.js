@@ -63,7 +63,6 @@ test('Blogs have id property', async () => {
 
 })
 
-
 test('Can add a new blog to the database', async () => {
 
     const newBlog = {
@@ -153,6 +152,34 @@ test('Can delete a blog', async () => {
         .expect('Content-Type', /application\/json/)
  
     expect(postDeleteResults.body).toHaveLength(initialBlogs.length - 1)
+
+})
+
+test('Can update a blog', async () => {
+    
+    const newBlogContent = {
+        likes: 0
+    }
+
+    const preUpdateResults = await api
+       .get('/api/blogs')
+       .expect(200)
+       .expect('Content-Type', /application\/json/)
+
+    const preUpdateObject = preUpdateResults.body[0]
+       
+    await api
+        .put(`/api/blogs/${preUpdateResults.body[0].id}`)
+        .send(newBlogContent)
+        .expect(200)
+
+    const postUpdateResults = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/) 
+    
+    const updatedObject = postUpdateResults.body.find(b => b.id === preUpdateResults.body[0].id)        
+    expect(updatedObject).toMatchObject({...preUpdateObject, likes:0})
 
 })
 

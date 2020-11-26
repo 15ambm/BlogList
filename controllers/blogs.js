@@ -1,22 +1,30 @@
 
 const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 blogRouter.get('/', async (request, response) => {
-    
-    const blogs = await Blog.find({})
+    const blogs = await Blog.find({}).populate('user', {username:1, name:1})
     response.json(blogs)
 })
 
 blogRouter.post('/', async (request, response) => {
     
-    const blogData = request.body
+    const user = await User.findOne({})
+    const blogData = {...request.body, user:user._id}
+
     if(!blogData.hasOwnProperty('title') || !blogData.hasOwnProperty('url')) {
         response.status(400).end()
     } else {
         const blog = new Blog(blogData)
         const result = await blog.save()
-        response.status(201).json(result)
+        try {
+            user.blogs = await user.blogs.concat(result._id)
+            await user.save()
+            response.status(201).json(result)
+        } catch (e) {
+            response.status(400).end()
+        }
     }
 
 })

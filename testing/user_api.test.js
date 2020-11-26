@@ -37,8 +37,6 @@ test('Add a single valid user', async () => {
         .expect(200)
         .expect('Content-Type', /application\/json/ )
 
-    
-
 })
 
 test('Cannot add without username', async () => {
@@ -127,9 +125,6 @@ test('Username must be unique', async () => {
     expect(results.body.error).toBe('User validation failed: username: Error, expected `username` to be unique. Value: `gooby`')
 
 })
-
-
-
 
 afterAll(async () => {
     await User.deleteMany({})

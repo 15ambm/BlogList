@@ -2,10 +2,12 @@
 const mongoose = require('mongoose')
 const app = require('../app')
 const supertest = require('supertest')
+const bcrypt = require('bcrypt')
 
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const initialBlogs = [
     {  
@@ -29,7 +31,14 @@ const initialBlogs = [
 ]
 beforeEach(async () => {
 
+    const initialUser = {
+        username:"GOOB",
+        name:"alex",
+        passwordHash: await bcrypt.hash("password", 10)
+    }
+
     await Blog.deleteMany({})
+    await User.deleteMany({})
 
     const blogs = initialBlogs.map(b => new Blog(b))
 
@@ -37,6 +46,9 @@ beforeEach(async () => {
         blog = new Blog(b)
         await blog.save()
     }
+
+    const user = new User(initialUser)
+    await user.save()
 
 })
 
@@ -71,7 +83,8 @@ test('Can add a new blog to the database', async () => {
         url: "No",
         likes: 69
     } 
-    
+
+
     await api
         .post('/api/blogs')
         .send(newBlog)
@@ -185,6 +198,7 @@ test('Can update a blog', async () => {
 
 afterAll(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
     mongoose.connection.close()
 })
   

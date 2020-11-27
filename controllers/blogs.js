@@ -2,6 +2,15 @@
 const blogRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
+
+const getTokenFrom = request => {
+    const authorization = request.get('authorization')
+    if(authorization && authorization.toLowerCase().startsWith('bearer ')) {
+        return authorization.substring(7)
+    } else return null
+}
+
 
 blogRouter.get('/', async (request, response) => {
     const blogs = await Blog.find({}).populate('user', {username:1, name:1})
@@ -10,11 +19,20 @@ blogRouter.get('/', async (request, response) => {
 
 blogRouter.post('/', async (request, response) => {
     
-    const user = await User.findOne({})
+    const token = getTokenFrom(request)
+    let decodedToken
+
+    try {
+        decodedToken = await jwt.verify(token, process.env.SECRET)
+    } catch (e) {
+        return response.status(401).json({error:"token missing or invalid"})
+    }
+
+    const user = await User.findById(decodedToken.id)
     const blogData = {...request.body, user:user._id}
 
     if(!blogData.hasOwnProperty('title') || !blogData.hasOwnProperty('url')) {
-        response.status(400).end()
+        response.status(400).json({error:"missing fields"})
     } else {
         const blog = new Blog(blogData)
         const result = await blog.save()

@@ -77,16 +77,26 @@ test('Blogs have id property', async () => {
 
 test('Can add a new blog to the database', async () => {
 
-    const newBlog = {
-        title: "New Blog",
-        author: "Rich Johnson",
-        url: "No",
-        likes: 69
-    } 
+    const loginInformation = {
+        username:"GOOB",
+        password: "password"
+    }
 
+    const loginResponse = await api
+        .post('/api/login')
+        .send(loginInformation)
+        .expect(200)
+
+    const newBlog = {
+            title: "New Blog",
+            author: "GOOB",
+            url: "No",
+            likes: 69
+        } 
 
     await api
         .post('/api/blogs')
+        .set('Authorization', `bearer ${loginResponse.body.token}` )
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -103,16 +113,28 @@ test('Can add a new blog to the database', async () => {
 
 })
 
-test('Blogs missing likes default to 0 likes', async () => {
+test('Blogs missing likes default to 0 likes', async () => {   
     
+    const loginInformation = {
+        username:"GOOB",
+        password: "password"
+    }
+
+    const loginResponse = await api
+        .post('/api/login')
+        .send(loginInformation)
+        .expect(200)
+
+
     const newBlog = {
-        title: "New Blog",
-        author: "Rich Johnson",
-        url: "No",  
-       } 
+            title: "New Blog",
+            author: "Rich Johnson",
+            url: "No",  
+           } 
 
     await api
         .post('/api/blogs')
+        .set('Authorization', `bearer ${loginResponse.body.token}` )
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -129,15 +151,29 @@ test('Blogs missing likes default to 0 likes', async () => {
 
 test('Blogs missing title and url property return 400 bad request', async () => {
     
+
+    const loginInformation = {
+        username:"GOOB",
+        password: "password"
+    }
+
+    const loginResponse = await api
+        .post('/api/login')
+        .send(loginInformation)
+        .expect(200)
+
+
     const newBlog = {
         author: "Rich Johnson",
         likes: 123
-       } 
-
+    } 
+    
     await api
         .post('/api/blogs')
+        .set('Authorization', `bearer ${loginResponse.body.token}` )
         .send(newBlog)
         .expect(400)
+        .expect('Content-Type', /application\/json/)
 
    const results = await api
        .get('/api/blogs')

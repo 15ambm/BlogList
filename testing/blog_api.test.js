@@ -52,6 +52,25 @@ beforeEach(async () => {
 
 })
 
+test('Cannot add a blog without logging in/token authentication', async () => {
+    
+    const newBlog = {
+        title: "New Blog",
+        author: "GOOB",
+        url: "No",
+        likes: 69
+    } 
+
+    const results = await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401)
+        .expect('Content-Type', /application\/json/)
+
+    expect(results.body.error).toBe("token missing or invalid")
+
+})
+
 test('GET request to /api/blogs returns correct blogs', async () => {
     
     const results = await api

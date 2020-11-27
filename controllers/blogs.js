@@ -11,9 +11,6 @@ blogRouter.get('/', async (request, response) => {
 })
 
 blogRouter.post('/', async (request, response) => {
-    
-    // const token = getTokenFrom(request)
-    // let decodedToken
 
     try {
         decodedToken = await jwt.verify(request.token, process.env.SECRET)
@@ -42,10 +39,24 @@ blogRouter.post('/', async (request, response) => {
 
 blogRouter.delete('/:id', async (request, response) => {
 
-    const result = await Blog.findByIdAndRemove(request.params.id)
+    try {
+        decodedToken = await jwt.verify(request.token, process.env.SECRET)
+    } catch (e) {
+        return response.status(401).json({error:"token missing or invalid"})
+    }
+    const user = await User.findById(decodedToken.id)
+    const result = await Blog.findById(request.params.id)
 
-    if(result) response.status(204).end()
-    else response.status(404).end()
+    try {
+        if(user._id.toString() === result.user.toString()) {
+            const deletedBlog = await Blog.findByIdAndDelete(request.params.id)
+            return response.status(204).json(deletedBlog)
+        } else {
+            response.status(404).json({error:"cannot delete this post"})
+        }
+    } catch (e) {
+        response.status(404).json({error:"cannot find the blog post"})
+    }
 
 })
 

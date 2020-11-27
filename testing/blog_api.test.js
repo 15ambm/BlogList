@@ -185,14 +185,34 @@ test('Blogs missing title and url property return 400 bad request', async () => 
 })
 
 test('Can delete a blog', async () => {
+    
+    const loginInformation = {
+        username:"GOOB",
+        password: "password"
+    }
 
-    const preDeleteResults = await api
-       .get('/api/blogs')
-       .expect(200)
-       .expect('Content-Type', /application\/json/)
-       
+    const loginResponse = await api
+        .post('/api/login')
+        .send(loginInformation)
+        .expect(200)
+    
+    const newBlog = {
+            title: "New Blog",
+            author: "GOOB",
+            url: "No",
+            likes: 69
+        } 
+
+    const blog = await api
+        .post('/api/blogs')
+        .set('Authorization', `bearer ${loginResponse.body.token}` )
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
     await api
-        .delete(`/api/blogs/${preDeleteResults.body[0].id}`)
+        .delete(`/api/blogs/${blog.body.id}`)
+        .set('Authorization', `bearer ${loginResponse.body.token}` )
         .expect(204)
 
     const postDeleteResults = await api
@@ -200,7 +220,6 @@ test('Can delete a blog', async () => {
         .expect(200)
         .expect('Content-Type', /application\/json/)
  
-    expect(postDeleteResults.body).toHaveLength(initialBlogs.length - 1)
 
 })
 
